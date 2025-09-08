@@ -10,6 +10,10 @@ export default function HomePage() {
           <span className="font-semibold text-pink-600">arte</span> y{" "}
           <span className="font-semibold text-yellow-600">manualidades</span>.
         </p>
+        <p className="mt-4 text-lg text-gray-700">
+          Hecho por{" "}
+          <span className="font-semibold text-blue-600 drop-shadow-sm">Jesus Osvaldo Manriquez Gonzalez</span>.
+        </p>
 
         <div className="mt-6 flex gap-4 justify-center">
           <a

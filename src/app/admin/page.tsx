@@ -2,15 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getUserRole } from "@/lib/auth";
 
 export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const role = getUserRole();
-    if (role !== "admin") {
-      router.push("/login"); // Redirige si no es admin
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "admin") {
+      router.push("/login");
+      return;
     }
   }, [router]);
 

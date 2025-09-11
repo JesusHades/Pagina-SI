@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
   const router = useRouter();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -13,24 +14,36 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-      credentials: "include", // 🔑 importante para cookies
-    });
+    setLoading(true);
 
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    if (res.ok) {
-      // 🔑 aquí decides a dónde enviar
-      if (data.user?.role === "admin") {
-        router.push("/admin"); // si es admin → admin
+      const data = await res.json();
+
+      if (res.ok) {
+        // Guardar token y rol
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.user.role);
+
+        // Redirigir según rol
+        if (data.user.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
-        router.push("/dashboard"); // si es usuario → dashboard
+        alert(data.message);
       }
-    } else {
-      alert(data.message || "Error al iniciar sesión");
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      alert("Ocurrió un error. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,8 +73,9 @@ export default function LoginPage() {
         <button
           type="submit"
           className="w-full bg-pink-600 text-white p-2 rounded hover:bg-pink-700"
+          disabled={loading}
         >
-          Iniciar sesión
+          {loading ? "Iniciando sesión..." : "Iniciar sesión"}
         </button>
       </form>
     </div>

@@ -6,7 +6,7 @@ import type { User } from "@/types/user";
 
 export default function AdminPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null); // ✅ sin any
+  const [user, setUser] = useState<User | null>(null); //sin any
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function AdminPage() {
           return;
         }
 
-        setUser(data.user as User); // 👈 casteamos al tipo User
+        setUser(data.user as User);
       } catch (error) {
         console.error("Error cargando usuario:", error);
         router.push("/login");

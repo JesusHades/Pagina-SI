@@ -15,13 +15,19 @@ export async function POST(req: Request) {
     // Buscar usuario por email
     const user = await users.findOne({ email });
     if (!user) {
-      return NextResponse.json({ message: "Usuario no encontrado" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Usuario no encontrado" },
+        { status: 404 }
+      );
     }
 
     // Verificar contraseña
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      return NextResponse.json({ message: "Contraseña incorrecta" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Contraseña incorrecta" },
+        { status: 401 }
+      );
     }
 
     // Generar JWT
@@ -31,12 +37,22 @@ export async function POST(req: Request) {
       { expiresIn: "1h" }
     );
 
+    // Respuesta con token + datos del usuario
     return NextResponse.json({
       message: "Inicio de sesión exitoso",
       token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        nombre: user.nombre,
+      },
     });
   } catch (error) {
     console.error("Error login:", error);
-    return NextResponse.json({ message: "Error en el servidor" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error en el servidor" },
+      { status: 500 }
+    );
   }
 }

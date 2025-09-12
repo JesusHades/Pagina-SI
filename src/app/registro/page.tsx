@@ -13,7 +13,7 @@ export default function RegistroPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/auth/register", {
+    const res = await fetch("/api/auth/registro", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -21,7 +21,7 @@ export default function RegistroPage() {
     const data = await res.json();
 
     if (res.ok) {
-      alert("Registro exitoso. Ahora puedes iniciar sesión.");
+      alert("Usuario creado correctamente. Inicia sesión.");
       router.push("/login"); //redirige al login
     } else {
       alert(data.message);
@@ -29,12 +29,12 @@ export default function RegistroPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 to-green-100">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-yellow-100 to-pink-100">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-2xl shadow-md w-96"
       >
-        <h2 className="text-2xl font-bold text-green-600 mb-4">Registro</h2>
+        <h2 className="text-2xl font-bold text-pink-600 mb-4">Registro</h2>
         <input
           type="text"
           name="nombre"
@@ -61,9 +61,9 @@ export default function RegistroPage() {
         />
         <button
           type="submit"
-          className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
+          className="w-full bg-pink-600 text-white p-2 rounded hover:bg-pink-700"
         >
-          Registrarse
+          Crear cuenta
         </button>
       </form>
     </div>

@@ -105,6 +105,33 @@ export default function AdminPage() {
     }
   };
 
+  // Eliminar usuario
+  const deleteUser = async (userId: string) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    if (!confirm("¿Seguro que quieres eliminar este usuario?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/delete?id=${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        // Quitar de la lista sin recargar
+        setUsers((prev) => prev.filter((u) => u._id !== userId));
+      } else {
+        const data = await res.json();
+        alert(data.message || "Error al eliminar usuario");
+      }
+    } catch (error) {
+      console.error("Error eliminando usuario:", error);
+    }
+  };
+
   if (loading) return <p className="p-8">Cargando...</p>;
 
   return (
@@ -152,9 +179,15 @@ export default function AdminPage() {
               <td className="p-2 border">
                 <button
                   onClick={() => toggleRole(u._id, u.role)}
-                  className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 mr-2"
                 >
                   Cambiar rol
+                </button>
+                <button
+                  onClick={() => deleteUser(u._id)}
+                  className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                >
+                  Eliminar
                 </button>
               </td>
             </tr>

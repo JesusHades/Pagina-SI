@@ -91,7 +91,6 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        // Actualizar la lista localmente
         setUsers((prev) =>
           prev.map((u) =>
             u._id === userId
@@ -121,7 +120,6 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        // Quitar de la lista sin recargar
         setUsers((prev) => prev.filter((u) => u._id !== userId));
       } else {
         const data = await res.json();
@@ -135,65 +133,103 @@ export default function AdminPage() {
   if (loading) return <p className="p-8">Cargando...</p>;
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Panel de Administración</h1>
+    <div className="p-8 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-800">
+          Panel de Administración
+        </h1>
         <button
           onClick={logout}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          className="bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition"
         >
           Cerrar sesión
         </button>
       </div>
 
+      {/* Admin Info */}
       {user && (
-        <div className="mt-4 mb-6">
-          <p>
-            <strong>Admin:</strong> {user.nombre}
-          </p>
-          <p>
-            <strong>Email:</strong> {user.email}
-          </p>
-          <p>
-            <strong>Rol:</strong> {user.role}
-          </p>
+        <div className="bg-white shadow rounded-lg p-6 mb-8 border border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">
+            Información del Administrador
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-gray-600">
+            <p>
+              <strong>Nombre:</strong> {user.nombre}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+            <p>
+              <strong>Rol:</strong>{" "}
+              <span className="text-green-600 font-medium">{user.role}</span>
+            </p>
+          </div>
         </div>
       )}
 
-      <h2 className="text-xl font-bold mb-4">Usuarios registrados</h2>
-      <table className="w-full border border-gray-300 rounded">
-        <thead>
-          <tr className="bg-black text-white">
-            <th className="p-2 border">Nombre</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Rol</th>
-            <th className="p-2 border">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u._id}>
-              <td className="p-2 border">{u.nombre}</td>
-              <td className="p-2 border">{u.email}</td>
-              <td className="p-2 border">{u.role}</td>
-              <td className="p-2 border">
-                <button
-                  onClick={() => toggleRole(u._id, u.role)}
-                  className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 mr-2"
-                >
-                  Cambiar rol
-                </button>
-                <button
-                  onClick={() => deleteUser(u._id)}
-                  className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
-                >
-                  Eliminar
-                </button>
-              </td>
+      {/* Tabla de usuarios */}
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        Usuarios registrados
+      </h2>
+      <div className="overflow-x-auto">
+        <table className="w-full bg-white shadow rounded-lg border border-gray-200">
+          <thead>
+            <tr className="bg-gray-800 text-white">
+              <th className="p-3 text-left">Nombre</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Rol</th>
+              <th className="p-3 text-center">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr
+                key={u._id}
+                className="border-t hover:bg-gray-50 transition"
+              >
+                <td className="p-3 text-black">{u.nombre}</td>
+                <td className="p-3 text-black">{u.email}</td>
+                <td className="p-3">
+                  <span
+                    className={`px-2 py-1 rounded text-sm font-medium ${
+                      u.role === "admin"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {u.role}
+                  </span>
+                </td>
+                <td className="p-3 text-center space-x-2">
+                  <button
+                    onClick={() => toggleRole(u._id, u.role)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-700 transition"
+                  >
+                    Cambiar rol
+                  </button>
+                  <button
+                    onClick={() => deleteUser(u._id)}
+                    className="bg-red-600 text-white px-3 py-1 rounded-lg shadow hover:bg-red-700 transition"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {users.length === 0 && (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="p-4 text-center text-gray-500 italic"
+                >
+                  No hay usuarios registrados.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

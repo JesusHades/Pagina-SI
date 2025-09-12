@@ -20,3 +20,14 @@ export function getUserRole(): "user" | "admin" | null {
     return null;
   }
 }
+
+export async function logout() {
+  try {
+    await fetch("/logout", { method: "POST" }); // llama al backend
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  } finally {
+    localStorage.removeItem("token"); // limpia el token
+    window.location.href = "/login";  // redirige al login
+  }
+}

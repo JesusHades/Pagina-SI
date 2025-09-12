@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@/types/user";
+import { logout } from "@/lib/auth";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -45,7 +46,16 @@ export default function DashboardPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold">Dashboard de Usuario</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Dashboard de Usuario</h1>
+        <button
+          onClick={logout}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+
       {user ? (
         <>
           <p className="mt-2">Bienvenido: {user.nombre}</p>

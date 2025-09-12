@@ -8,8 +8,10 @@ import { logout } from "@/lib/auth";
 export default function AdminPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Cargar info del admin
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
@@ -40,13 +42,68 @@ export default function AdminPage() {
       } catch (error) {
         console.error("Error cargando usuario:", error);
         router.push("/login");
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchUser();
   }, [router]);
+
+  // Cargar lista de usuarios
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/admin/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUsers(data.users);
+        }
+      } catch (error) {
+        console.error("Error cargando usuarios:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Cambiar rol de un usuario
+  const toggleRole = async (userId: string, currentRole: "user" | "admin") => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch("/api/admin/rol", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          newRole: currentRole === "admin" ? "user" : "admin",
+        }),
+      });
+
+      if (res.ok) {
+        // Actualizar la lista localmente
+        setUsers((prev) =>
+          prev.map((u) =>
+            u._id === userId
+              ? { ...u, role: currentRole === "admin" ? "user" : "admin" }
+              : u
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error cambiando rol:", error);
+    }
+  };
 
   if (loading) return <p className="p-8">Cargando...</p>;
 
@@ -63,7 +120,7 @@ export default function AdminPage() {
       </div>
 
       {user && (
-        <div className="mt-4">
+        <div className="mt-4 mb-6">
           <p>
             <strong>Admin:</strong> {user.nombre}
           </p>
@@ -75,6 +132,35 @@ export default function AdminPage() {
           </p>
         </div>
       )}
+
+      <h2 className="text-xl font-bold mb-4">Usuarios registrados</h2>
+      <table className="w-full border border-gray-300 rounded">
+        <thead>
+          <tr className="bg-black text-white">
+            <th className="p-2 border">Nombre</th>
+            <th className="p-2 border">Email</th>
+            <th className="p-2 border">Rol</th>
+            <th className="p-2 border">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((u) => (
+            <tr key={u._id}>
+              <td className="p-2 border">{u.nombre}</td>
+              <td className="p-2 border">{u.email}</td>
+              <td className="p-2 border">{u.role}</td>
+              <td className="p-2 border">
+                <button
+                  onClick={() => toggleRole(u._id, u.role)}
+                  className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                >
+                  Cambiar rol
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

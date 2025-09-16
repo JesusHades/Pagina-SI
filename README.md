@@ -13,7 +13,7 @@ El proyecto debe contener un archivo con las credenciales de la base de datos pa
 
 # URI de conexión a MongoDB Atlas
 
-MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/talleresdb?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<"usuario">:<"password">@<"cluster">.mongodb.net/talleresdb?retryWrites=true&w=majority
 
 # Clave secreta para firmar los JWT
 

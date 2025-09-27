@@ -4,32 +4,50 @@ import { ObjectId } from "mongodb";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 export async function DELETE(req: NextRequest) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return NextResponse.json({ message: "Token faltante" }, { status: 401 });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const secret = process.env.JWT_SECRET as string;
+
+  let decoded: JwtPayload;
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return NextResponse.json({ message: "Token faltante" }, { status: 401 });
-    }
+    decoded = jwt.verify(token, secret) as JwtPayload;
+  } catch {
+    return NextResponse.json({ message: "Token inválido o expirado" }, { status: 401 });
+  }
 
-    const token = authHeader.replace("Bearer ", "");
-    const secret = process.env.JWT_SECRET as string;
-    const decoded = jwt.verify(token, secret) as JwtPayload;
+  if (decoded.role !== "admin") {
+    return NextResponse.json({ message: "Acceso denegado" }, { status: 403 });
+  }
 
-    if (decoded.role !== "admin") {
-      return NextResponse.json({ message: "Acceso denegado" }, { status: 403 });
-    }
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("id");
 
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("id");
+  if (!userId) {
+    return NextResponse.json({ message: "ID de usuario faltante" }, { status: 400 });
+  }
 
-    if (!userId) {
-      return NextResponse.json({ message: "ID de usuario faltante" }, { status: 400 });
-    }
+  if (!ObjectId.isValid(userId)) {
+    return NextResponse.json({ message: "ID de usuario inválido" }, { status: 400 });
+  }
 
+  //------- impedir que un admin se elimine a sí mismo-----
+  if (decoded.id && decoded.id.toString() === userId) {
+    return NextResponse.json(
+      { message: "No puedes eliminar tu propio usuario" },
+      { status: 400 }
+    );
+  }
+
+  try {
     const client = await clientPromise;
     const db = client.db("talleresdb");
-    const usersCollection = db.collection("users");
+    const users = db.collection("users");
 
-    const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+    const result = await users.deleteOne({ _id: new ObjectId(userId) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ message: "Usuario no encontrado" }, { status: 404 });
